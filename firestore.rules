@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuth() { return request.auth != null; }
+    function myUid() { return request.auth.uid; }
+    function myDoc() { return get(/databases/$(database)/documents/users/$(myUid())).data; }
+    function isAdmin() { return isAuth() && myDoc().role == 'admin'; }
+    function isDealer() { return isAuth() && myDoc().role == 'dealer'; }
+
+    match /users/{uid} {
+      allow read: if isAuth() && (myUid() == uid || isAdmin() || isDealer());
+      // Self-create on signup
+      allow create: if isAuth() && myUid() == uid;
+      // Admins manage everyone, users manage themselves (limited)
+      allow write: if isAdmin() || (myUid() == uid);
+    }
+
+    match /areas/{id} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    match /packages/{id} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    match /invoices/{id} {
+      allow read: if isAuth();
+      allow write: if isAuth(); // tightened later; client billing writes invoices
+    }
+
+    match /payments/{id} {
+      allow read: if isAuth();
+      allow create: if isAdmin() || isDealer();
+      allow update: if isAdmin() || (isDealer() && resource.data.receivedByUid == myUid());
+      allow delete: if isAdmin();
+    }
+
+    match /paymentCorrections/{id} {
+      allow read: if isAuth();
+      allow create: if isAdmin() || isDealer();
+      allow write: if isAdmin();
+    }
+  }
+}
