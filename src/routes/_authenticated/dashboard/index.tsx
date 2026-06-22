@@ -196,6 +196,17 @@ function DashboardPage() {
     { name: "Overdue", value: overdue, color: "var(--color-destructive)" },
   ].filter((d) => d.value > 0);
 
+  // Area-wise revenue
+  const areaRevenueData = areas
+    .filter((area) => role === "admin" || (user?.assignedAreaIds ?? []).includes(area.id))
+    .map((area) => {
+      const areaPayments = payments.filter((p) => p.areaId === area.id);
+      const revenue = areaPayments.reduce((sum, p) => sum + p.amount, 0);
+      return { name: area.name, revenue };
+    })
+    .filter((d) => d.revenue > 0)
+    .sort((a, b) => b.revenue - a.revenue);
+
   const handleStatClick = (status?: string, due?: string) => {
     const params = new URLSearchParams();
     if (status) params.set("status", status);
@@ -372,7 +383,7 @@ function DashboardPage() {
         </Card>
       </div>
 
-      <div className="mt-4">
+      <div className="grid lg:grid-cols-2 gap-4 mt-4">
         <Card>
           <CardHeader>
             <CardTitle>Due Dates — Next 5 Days</CardTitle>
@@ -393,6 +404,33 @@ function DashboardPage() {
                 <Bar dataKey="count" fill="var(--color-primary)" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Area-wise Revenue</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {areaRevenueData.length === 0 ? (
+              <div className="text-sm text-muted-foreground py-12 text-center">No data yet</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={areaRevenueData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                  <XAxis type="number" stroke="var(--color-muted-foreground)" fontSize={12} />
+                  <YAxis dataKey="name" type="category" stroke="var(--color-muted-foreground)" fontSize={11} width={100} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--color-card)",
+                      border: "1px solid var(--color-border)",
+                      borderRadius: 8,
+                    }}
+                    formatter={(value: number) => fmtPKR(value)}
+                  />
+                  <Bar dataKey="revenue" fill="var(--color-primary)" radius={[0, 8, 8, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
