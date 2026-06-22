@@ -141,8 +141,8 @@ import { reversePayment, reassignPayment } from "@/lib/payment-correction";
 export const Route = createFileRoute("/_authenticated/users")({
   component: UsersPage,
   validateSearch: (search: Record<string, unknown>) => ({
-    status: (search.status as string) || "all",
-    due: (search.due as string) || "all",
+    status: (search.status as string) || undefined,
+    due: (search.due as string) || undefined,
   }),
 });
 
@@ -163,9 +163,9 @@ function UsersPage() {
   const isMounted = useRef(true);
 
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState(searchParams.status);
+  const [statusFilter, setStatusFilter] = useState(searchParams.status ?? "all");
   const [areaFilter, setAreaFilter] = useState("all");
-  const [dueFilter, setDueFilter] = useState(searchParams.due);
+  const [dueFilter, setDueFilter] = useState(searchParams.due ?? "all");
   const [page, setPage] = useState(1);
   const PER = 15;
 
