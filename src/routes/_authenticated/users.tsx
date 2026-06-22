@@ -811,7 +811,7 @@ function CustomerDialog({
   const [name, setName] = useState(initial?.name ?? "");
   const [username, setUsername] = useState(initial?.username ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState(initial?.password ?? "");
   const [phone, setPhone] = useState(initial?.phone ?? "");
   const [cnic, setCnic] = useState(initial?.cnic ?? "");
   const [address, setAddress] = useState(initial?.address ?? "");
