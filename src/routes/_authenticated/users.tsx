@@ -319,8 +319,10 @@ function UsersPage() {
               onChange={(e) => {
                 setStatusFilter(e.target.value);
                 setPage(1);
-                const newSearch = e.target.value === "all" ? { due: searchParams.due === "all" ? undefined : searchParams.due } : { ...searchParams, status: e.target.value };
-                navigate({ search: newSearch });
+                const search: any = {};
+                if (e.target.value !== "all") search.status = e.target.value;
+                if (searchParams.due !== "all") search.due = searchParams.due;
+                navigate({ search });
               }}
             >
               <option value="all">All statuses</option>
@@ -337,8 +339,10 @@ function UsersPage() {
               onChange={(e) => {
                 setDueFilter(e.target.value);
                 setPage(1);
-                const newSearch = e.target.value === "all" ? { status: searchParams.status === "all" ? undefined : searchParams.status } : { ...searchParams, due: e.target.value };
-                navigate({ search: newSearch });
+                const search: any = {};
+                if (searchParams.status !== "all") search.status = searchParams.status;
+                if (e.target.value !== "all") search.due = e.target.value;
+                navigate({ search });
               }}
             >
               <option value="all">All dates</option>
