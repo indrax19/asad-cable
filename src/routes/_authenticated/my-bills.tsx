@@ -101,7 +101,7 @@ function MyBillsPage() {
             <Row k="Speed" v={pkg?.speed ?? "—"} />
             <Row k="Monthly Fee" v={fmtPKR(user.monthlyFee)} />
             <Row k="Activated" v={fmtDate(user.activationDate)} />
-            <Row k="Last Payment" v={fmtDate(user.lastPaymentDate)} />
+            <Row k="Last Payment" v={user.lastPaymentDateText ?? "—"} />
             <Row k="Pending Amount" v={fmtPKR(user.pendingAmount)} />
             <Row k="Advance Balance" v={fmtPKR(user.advanceBalance)} />
             <Row k="Connection" v={<StatusBadge status={user.connectionStatus ?? "active"} />} />
