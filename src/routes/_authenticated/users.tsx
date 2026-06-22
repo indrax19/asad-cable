@@ -141,8 +141,8 @@ import { reversePayment, reassignPayment } from "@/lib/payment-correction";
 export const Route = createFileRoute("/_authenticated/users")({
   component: UsersPage,
   validateSearch: (search: Record<string, unknown>) => ({
-    status: (search.status as string) || undefined,
-    due: (search.due as string) || undefined,
+    status: (search.status as string) || "all",
+    due: (search.due as string) || "all",
   }),
 });
 
@@ -319,7 +319,8 @@ function UsersPage() {
               onChange={(e) => {
                 setStatusFilter(e.target.value);
                 setPage(1);
-                navigate({ search: (prev) => ({ ...prev, status: e.target.value }) });
+                const newSearch = e.target.value === "all" ? { due: searchParams.due === "all" ? undefined : searchParams.due } : { ...searchParams, status: e.target.value };
+                navigate({ search: newSearch });
               }}
             >
               <option value="all">All statuses</option>
@@ -336,7 +337,8 @@ function UsersPage() {
               onChange={(e) => {
                 setDueFilter(e.target.value);
                 setPage(1);
-                navigate({ search: (prev) => ({ ...prev, due: e.target.value }) });
+                const newSearch = e.target.value === "all" ? { status: searchParams.status === "all" ? undefined : searchParams.status } : { ...searchParams, due: e.target.value };
+                navigate({ search: newSearch });
               }}
             >
               <option value="all">All dates</option>
