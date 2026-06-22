@@ -811,7 +811,7 @@ function CustomerDialog({
   const [name, setName] = useState(initial?.name ?? "");
   const [username, setUsername] = useState(initial?.username ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState(initial?.password ?? "");
   const [phone, setPhone] = useState(initial?.phone ?? "");
   const [cnic, setCnic] = useState(initial?.cnic ?? "");
   const [address, setAddress] = useState(initial?.address ?? "");
@@ -1131,14 +1131,22 @@ function ReceivePaymentDialog({ customer, onClose }: { customer: UserDoc; onClos
   const newPending = Math.max(0, pendingAmount - paymentAmount);
   const newAdvance = (customer.advanceBalance ?? 0) + overpayment;
 
+  const setTimeToMidnightPlusOne = (timestamp: number): number => {
+    const date = new Date(timestamp);
+    date.setHours(0, 1, 0, 0);
+    return date.getTime();
+  };
+
   const getDefaultNextDueDate = () => {
     const now = Date.now();
-    return addDays(now, CYCLE);
+    const futureDate = addDays(now, CYCLE);
+    return setTimeToMidnightPlusOne(futureDate);
   };
 
   const getFinalDueDate = () => {
     if (customDueDate) {
-      return new Date(customDueDate).getTime();
+      const dateTime = new Date(customDueDate).getTime();
+      return setTimeToMidnightPlusOne(dateTime);
     }
     return getDefaultNextDueDate();
   };
