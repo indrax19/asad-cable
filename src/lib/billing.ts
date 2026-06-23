@@ -7,8 +7,8 @@ const CYCLE_DAYS = 30;
 
 export function paymentStatusOf(c: UserDoc): "paid" | "unpaid" | "partial" | "overdue" {
   const pending = c.pendingAmount ?? 0;
-  if (pending <= 0) return "paid";
   if (c.nextDueDate && Date.now() > c.nextDueDate) return "overdue";
+  if (pending <= 0) return "paid";
   if (pending < (c.monthlyFee ?? 0)) return "partial";
   return "unpaid";
 }
@@ -28,4 +28,3 @@ export const CYCLE = CYCLE_DAYS;
 export async function runAutoBillingForCustomer(_c: UserDoc): Promise<void> {
   return;
 }
-
