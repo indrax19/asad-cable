@@ -7,8 +7,8 @@ const CYCLE_DAYS = 30;
 
 export function paymentStatusOf(c: UserDoc): "paid" | "unpaid" | "partial" | "overdue" {
   const pending = c.pendingAmount ?? 0;
-  if (pending <= 0) return "paid";
   if (c.nextDueDate && Date.now() > c.nextDueDate) return "overdue";
+  if (pending <= 0) return "paid";
   if (pending < (c.monthlyFee ?? 0)) return "partial";
   return "unpaid";
 }
@@ -20,12 +20,23 @@ export function addDays(ts: number, days: number) {
 export const CYCLE = CYCLE_DAYS;
 
 /**
- * Rolling 30-day billing model: next due date = lastPaymentDate + 30 days.
- * No auto-billing cron is needed — pending stays as the unpaid balance until
- * a payment is received, then nextDueDate is recomputed from payment date.
- * Kept as a no-op for backward compatibility with existing call sites.
+ * Auto-billing: when a customer is overdue (due date passed), automatically
+ * generate a new bill by adding the monthly fee to pending amount and extending
+ * the due date by 30 days.
  */
-export async function runAutoBillingForCustomer(_c: UserDoc): Promise<void> {
-  return;
-}
+export async function runAutoBillingForCustomer(c: UserDoc): Promise<void> {
+  const now = Date.now();
+  const isOverdue = c.nextDueDate && now > c.nextDueDate;
+  const hasNoBalance = (c.pendingAmount ?? 0) <= 0;
 
+  if (!isOverdue || !hasNoBalance) return;
+
+  const newPending = (c.monthlyFee ?? 0);
+  const newNextDueDate = addDays(now, CYCLE);
+
+  await updateDoc(doc(db, "users", c.uid), {
+    pendingAmount: newPending,
+    nextDueDate: newNextDueDate,
+    paymentStatus: newPending > 0 ? "unpaid" : "paid",
+  });
+}

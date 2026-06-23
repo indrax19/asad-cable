@@ -134,7 +134,7 @@ import type {
   PaymentDoc,
   PaymentMethod,
 } from "@/lib/types";
-import { paymentStatusOf, CYCLE, addDays } from "@/lib/billing";
+import { paymentStatusOf, CYCLE, addDays, runAutoBillingForCustomer } from "@/lib/billing";
 import { toast } from "sonner";
 import { reversePayment, reassignPayment } from "@/lib/payment-correction";
 
@@ -181,6 +181,11 @@ function UsersPage() {
             ? all.filter((c) => (user.assignedAreaIds ?? []).includes(c.areaId ?? ""))
             : all;
         setCustomers(scoped);
+
+        // Auto-billing: check overdue customers and generate new bills
+        scoped.forEach((c) => {
+          runAutoBillingForCustomer(c);
+        });
       },
     );
     const u2 = onSnapshot(collection(db, "areas"), (snap) => {
