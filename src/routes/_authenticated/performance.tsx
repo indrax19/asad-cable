@@ -150,7 +150,7 @@ function PerformancePage() {
   const dealerPerformance = dealers.map((dealer) => {
     const dealerAreas = areas.filter((a) => a.dealerIds.includes(dealer.uid));
     const dealerCustomers = customers.filter((c) => dealerAreas.some((a) => a.id === c.areaId));
-    const dealerPayments = payments.filter((p) => dealerAreas.some((a) => a.id === p.areaId));
+    const dealerPayments = payments.filter((p) => p.dealerId === dealer.uid);
     const currentMonthPayments = dealerPayments.filter((p) => p.date >= currentMonthStart.getTime() && p.date <= currentMonthEnd.getTime());
     const todayPayments = dealerPayments.filter((p) => p.date >= todayStart.getTime() && p.date <= todayEnd.getTime());
     const dealerMonthlyRevenue = currentMonthPayments.reduce((s, p) => s + p.amount, 0);
