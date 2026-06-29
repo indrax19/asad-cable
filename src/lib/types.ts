@@ -26,6 +26,7 @@ export interface UserDoc {
   dealerId?: string;
   activationDate?: number;
   monthlyFee?: number;
+  discount?: number;
   lastPaymentDate?: number;
   nextDueDate?: number;
   pendingAmount?: number;
