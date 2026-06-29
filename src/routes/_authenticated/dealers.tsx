@@ -767,7 +767,7 @@ function DealerRecoveryDrawer({ dealer, onClose }: { dealer: UserDoc; onClose: (
                       <div>
                         <div className="text-green-700">Payment</div>
                         <div className="font-bold text-lg text-green-600">
-                          Rs {fmtPKR(Number(paymentReceived))}
+                          {fmtPKR(Number(paymentReceived))}
                         </div>
                       </div>
                       <div>
@@ -779,7 +779,7 @@ function DealerRecoveryDrawer({ dealer, onClose }: { dealer: UserDoc; onClose: (
                         <div
                           className={`font-bold text-lg ${Number(recoveryAmount) - Number(paymentReceived) >= 0 ? "text-orange-600" : "text-green-600"}`}
                         >
-                          Rs {fmtPKR(Math.abs(Number(recoveryAmount) - Number(paymentReceived)))}
+                          {fmtPKR(Math.abs(Number(recoveryAmount) - Number(paymentReceived)))}
                         </div>
                       </div>
                     </div>
