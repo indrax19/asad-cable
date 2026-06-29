@@ -142,17 +142,25 @@ function PerformancePage() {
   const currentMonthEnd = new Date();
   currentMonthEnd.setHours(23, 59, 59, 999);
 
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999);
+
   const dealerPerformance = dealers.map((dealer) => {
     const dealerAreas = areas.filter((a) => a.dealerIds.includes(dealer.uid));
     const dealerCustomers = customers.filter((c) => dealerAreas.some((a) => a.id === c.areaId));
     const dealerPayments = payments.filter((p) => dealerAreas.some((a) => a.id === p.areaId));
     const currentMonthPayments = dealerPayments.filter((p) => p.date >= currentMonthStart.getTime() && p.date <= currentMonthEnd.getTime());
+    const todayPayments = dealerPayments.filter((p) => p.date >= todayStart.getTime() && p.date <= todayEnd.getTime());
     const dealerMonthlyRevenue = currentMonthPayments.reduce((s, p) => s + p.amount, 0);
+    const dealerTodayRevenue = todayPayments.reduce((s, p) => s + p.amount, 0);
     const dealerPendingRecovery = dealerCustomers.reduce((sum, c) => sum + (c.pendingAmount ?? 0), 0);
     return {
       dealer,
       areas: dealerAreas,
       monthlyRevenue: dealerMonthlyRevenue,
+      todayRevenue: dealerTodayRevenue,
       pendingRecovery: dealerPendingRecovery,
     };
   });
@@ -179,6 +187,7 @@ function PerformancePage() {
         return {
           Dealer: perf.dealer.name,
           Areas: perf.areas.map((a) => a.name).join(", ") || "—",
+          "Today's Payment": perf.todayRevenue,
           "Monthly Revenue": perf.monthlyRevenue,
           "Pending Recovery": perf.pendingRecovery,
         };
@@ -280,6 +289,7 @@ function PerformancePage() {
                   <TableRow className="border-slate-200 dark:border-slate-700 hover:bg-transparent">
                     <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-3">Dealer</TableHead>
                     <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-3">Areas</TableHead>
+                    <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 py-3">Today's Payment</TableHead>
                     <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 py-3">Monthly Revenue</TableHead>
                     <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 py-3">Pending Recovery</TableHead>
                   </TableRow>
@@ -289,6 +299,7 @@ function PerformancePage() {
                     <TableRow key={perf.dealer.uid} className={`border-slate-200 dark:border-slate-700 ${idx % 2 === 1 ? 'bg-slate-50 dark:bg-slate-900/30' : ''} hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-colors`}>
                       <TableCell className="font-semibold text-slate-900 dark:text-white py-4">{perf.dealer.name}</TableCell>
                       <TableCell className="text-sm text-slate-600 dark:text-slate-400 py-4">{perf.areas.map((a) => a.name).join(", ") || "—"}</TableCell>
+                      <TableCell className="text-right font-bold text-blue-600 dark:text-blue-400 py-4">{fmtPKR(perf.todayRevenue)}</TableCell>
                       <TableCell className="text-right font-bold text-green-600 dark:text-green-400 py-4">{fmtPKR(perf.monthlyRevenue)}</TableCell>
                       <TableCell className="text-right font-bold text-red-600 dark:text-red-400 py-4">{fmtPKR(perf.pendingRecovery)}</TableCell>
                     </TableRow>
