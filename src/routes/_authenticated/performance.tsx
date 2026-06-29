@@ -149,13 +149,11 @@ function PerformancePage() {
     const currentMonthPayments = dealerPayments.filter((p) => p.date >= currentMonthStart.getTime() && p.date <= currentMonthEnd.getTime());
     const dealerMonthlyRevenue = currentMonthPayments.reduce((s, p) => s + p.amount, 0);
     const dealerPendingRecovery = dealerCustomers.reduce((sum, c) => sum + (c.pendingAmount ?? 0), 0);
-    const dealerRecoveryReceived = currentMonthPayments.reduce((s, p) => s + p.amount, 0);
     return {
       dealer,
       areas: dealerAreas,
       monthlyRevenue: dealerMonthlyRevenue,
       pendingRecovery: dealerPendingRecovery,
-      recoveryReceived: dealerRecoveryReceived,
     };
   });
 
@@ -182,7 +180,6 @@ function PerformancePage() {
           Dealer: perf.dealer.name,
           Areas: perf.areas.map((a) => a.name).join(", ") || "—",
           "Monthly Revenue": perf.monthlyRevenue,
-          "Recovery Received": perf.recoveryReceived,
           "Pending Recovery": perf.pendingRecovery,
         };
       } else {
@@ -284,7 +281,6 @@ function PerformancePage() {
                     <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-3">Dealer</TableHead>
                     <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-3">Areas</TableHead>
                     <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 py-3">Monthly Revenue</TableHead>
-                    <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 py-3">Recovery Received</TableHead>
                     <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 py-3">Pending Recovery</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -294,7 +290,6 @@ function PerformancePage() {
                       <TableCell className="font-semibold text-slate-900 dark:text-white py-4">{perf.dealer.name}</TableCell>
                       <TableCell className="text-sm text-slate-600 dark:text-slate-400 py-4">{perf.areas.map((a) => a.name).join(", ") || "—"}</TableCell>
                       <TableCell className="text-right font-bold text-green-600 dark:text-green-400 py-4">{fmtPKR(perf.monthlyRevenue)}</TableCell>
-                      <TableCell className="text-right font-bold text-blue-600 dark:text-blue-400 py-4">{fmtPKR(perf.recoveryReceived)}</TableCell>
                       <TableCell className="text-right font-bold text-red-600 dark:text-red-400 py-4">{fmtPKR(perf.pendingRecovery)}</TableCell>
                     </TableRow>
                   ))}
