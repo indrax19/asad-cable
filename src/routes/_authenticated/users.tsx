@@ -827,11 +827,14 @@ function CustomerDialog({
   const [activationDate, setActivationDate] = useState(
     initial?.activationDate ? new Date(initial.activationDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
   );
+  const [discount, setDiscount] = useState(initial?.discount ?? 0);
   const [busy, setBusy] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const pkg = packages.find((p) => p.id === packageId);
+  const packagePrice = pkg?.monthlyPrice ?? 0;
+  const finalMonthlyFee = Math.max(0, packagePrice - discount);
 
   const captureLocation = async () => {
     setGeoLoading(true);
@@ -870,7 +873,8 @@ function CustomerDialog({
           packageId,
           areaId,
           dealerId: dealerId ?? null,
-          monthlyFee: pkg?.monthlyPrice ?? initial.monthlyFee,
+          monthlyFee: finalMonthlyFee,
+          discount: discount,
           activationDate: activationTs,
           activationDateText: fmtDateTimeText(activationTs),
           nextDueDate: activationTs,
@@ -920,10 +924,11 @@ function CustomerDialog({
           dealerId: dealerId ?? null,
           activationDate: activationTs,
           activationDateText: fmtDateTimeText(activationTs),
-          monthlyFee: pkg?.monthlyPrice ?? 0,
+          monthlyFee: finalMonthlyFee,
+          discount: discount,
           nextDueDate: activationTs,
           nextDueDateText: fmtDateTimeText(activationTs),
-          pendingAmount: pkg?.monthlyPrice ?? 0,
+          pendingAmount: finalMonthlyFee,
           lastBillGeneratedDate: 0,
           connectionStatus: "active",
           paymentStatus: "unpaid",
@@ -1050,6 +1055,27 @@ function CustomerDialog({
                 ))}
             </select>
           </div>
+          {packageId && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Discount</Label>
+              <div className="space-y-1">
+                <Input
+                  type="number"
+                  value={discount}
+                  onChange={(e) => setDiscount(Math.max(0, Number(e.target.value)))}
+                  placeholder="Enter discount amount"
+                  min="0"
+                  max={packagePrice}
+                  className="h-10"
+                />
+                <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                  <div>Package Price: {fmtPKR(packagePrice)}</div>
+                  <div>Discount: {fmtPKR(discount)}</div>
+                  <div className="font-medium text-foreground">Final Monthly Fee: {fmtPKR(finalMonthlyFee)}</div>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Area *</Label>
             <select

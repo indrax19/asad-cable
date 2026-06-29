@@ -704,14 +704,14 @@ function DealerRecoveryDrawer({ dealer, onClose }: { dealer: UserDoc; onClose: (
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
               <div className="text-xs text-blue-700 font-medium mb-1">Today's Recovery</div>
               <div className="text-2xl font-bold text-blue-900 mb-1">
-                Rs {fmtPKR(todayData.recovery)}
+               {fmtPKR(todayData.recovery)}
               </div>
               <div className="text-xs text-blue-600">Payment: Rs {fmtPKR(todayData.payment)}</div>
             </div>
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-4">
               <div className="text-xs text-purple-700 font-medium mb-1">This Month</div>
               <div className="text-2xl font-bold text-purple-900 mb-1">
-                Rs {fmtPKR(currentMonthData.recovery)}
+               {fmtPKR(currentMonthData.recovery)}
               </div>
               <div className="text-xs text-purple-600">
                 Payment: Rs {fmtPKR(currentMonthData.payment)}
