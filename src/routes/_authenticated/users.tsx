@@ -167,7 +167,7 @@ function UsersPage() {
   const [areaFilter, setAreaFilter] = useState("all");
   const [dueFilter, setDueFilter] = useState(searchParams.due);
   const [page, setPage] = useState(1);
-  const PER = 50;
+  const [itemsPerPage, setItemsPerPage] = useState(50);
 
   useEffect(() => {
     isMounted.current = true;
@@ -237,8 +237,9 @@ function UsersPage() {
     return result;
   }, [customers, search, statusFilter, areaFilter, dueFilter]);
 
-  const pageItems = filtered.slice((page - 1) * PER, page * PER);
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PER));
+  const effectivePerPage = itemsPerPage === 0 ? filtered.length : itemsPerPage;
+  const pageItems = filtered.slice((page - 1) * effectivePerPage, page * effectivePerPage);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / effectivePerPage));
 
   const toggleSelection = (uid: string) => {
     const newSet = new Set(selectedForReminder);
@@ -716,8 +717,24 @@ function UsersPage() {
         </CardContent>
       </Card>
 
-      <div className="flex items-center justify-between mt-3 gap-2 text-xs sm:text-sm px-1">
-        <div className="text-muted-foreground">{filtered.length} customers</div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-3 gap-3 text-xs sm:text-sm px-1">
+        <div className="flex items-center gap-3">
+          <div className="text-muted-foreground">{filtered.length} customers</div>
+          <select
+            className="h-8 rounded-md border bg-background px-2 text-xs"
+            value={itemsPerPage}
+            onChange={(e) => {
+              const val = e.target.value === "all" ? 0 : Number(e.target.value);
+              setItemsPerPage(val);
+              setPage(1);
+            }}
+          >
+            <option value={50}>50 per page</option>
+            <option value={100}>100 per page</option>
+            <option value={1000}>1000 per page</option>
+            <option value="all">All</option>
+          </select>
+        </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <Button
             size="sm"
