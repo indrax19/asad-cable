@@ -167,7 +167,7 @@ function UsersPage() {
   const [areaFilter, setAreaFilter] = useState("all");
   const [dueFilter, setDueFilter] = useState(searchParams.due);
   const [page, setPage] = useState(1);
-  const PER = 15;
+  const PER = 50;
 
   useEffect(() => {
     isMounted.current = true;
