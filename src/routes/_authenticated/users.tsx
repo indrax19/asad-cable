@@ -306,8 +306,8 @@ function UsersPage() {
 
       <Card className="mb-4">
         <CardContent className="p-2 sm:p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3">
-            <div className="relative sm:col-span-1 lg:col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+            <div className="relative sm:col-span-1">
               <Search className="size-3 sm:size-4 absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 className="pl-7 sm:pl-9 h-9 sm:h-10 text-xs sm:text-sm"
@@ -319,35 +319,6 @@ function UsersPage() {
                 }}
               />
             </div>
-            <select
-              className="h-9 sm:h-10 rounded-md border bg-background px-2 sm:px-3 text-xs sm:text-sm"
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setPage(1);
-                navigate({ search: (prev) => ({ ...prev, status: e.target.value }) });
-              }}
-            >
-              <option value="all">All statuses</option>
-              <option value="active">Active</option>
-              <option value="disabled">Disabled</option>
-              <option value="paid">Paid</option>
-              <option value="unpaid">Unpaid</option>
-              <option value="partial">Partial</option>
-              <option value="overdue">Overdue</option>
-            </select>
-            <select
-              className="h-9 sm:h-10 rounded-md border bg-background px-2 sm:px-3 text-xs sm:text-sm"
-              value={dueFilter}
-              onChange={(e) => {
-                setDueFilter(e.target.value);
-                setPage(1);
-                navigate({ search: (prev) => ({ ...prev, due: e.target.value }) });
-              }}
-            >
-              <option value="all">All dates</option>
-              <option value="thisweek">Due this week</option>
-            </select>
             <select
               className="h-9 sm:h-10 rounded-md border bg-background px-2 sm:px-3 text-xs sm:text-sm"
               value={areaFilter}
