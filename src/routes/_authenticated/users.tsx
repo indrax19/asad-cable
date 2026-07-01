@@ -140,16 +140,10 @@ import { reversePayment, reassignPayment } from "@/lib/payment-correction";
 
 export const Route = createFileRoute("/_authenticated/users")({
   component: UsersPage,
-  validateSearch: (search: Record<string, unknown>) => ({
-    status: (search.status as string) || "all",
-    due: (search.due as string) || "all",
-  }),
 });
 
 function UsersPage() {
   const { user, role } = useAuth();
-  const searchParams = useSearch({ from: "/_authenticated/users" });
-  const navigate = useNavigate({ from: "/_authenticated/users" });
   const [customers, setCustomers] = useState<UserDoc[]>([]);
   const [areas, setAreas] = useState<AreaDoc[]>([]);
   const [packages, setPackages] = useState<PackageDoc[]>([]);
@@ -163,9 +157,7 @@ function UsersPage() {
   const isMounted = useRef(true);
 
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState(searchParams.status);
   const [areaFilter, setAreaFilter] = useState("all");
-  const [dueFilter, setDueFilter] = useState(searchParams.due);
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
@@ -205,37 +197,20 @@ function UsersPage() {
   }, [role, user]);
 
   const filtered = useMemo(() => {
-    const now = Date.now();
-    const weekFromNow = now + 7 * 24 * 60 * 60 * 1000;
-
     const result = customers.filter((c) => {
       if (
         search &&
         !`${c.name} ${c.phone ?? ""} ${c.cnic ?? ""}`.toLowerCase().includes(search.toLowerCase())
       )
         return false;
-      if (statusFilter !== "all") {
-        if (statusFilter === "active" && c.connectionStatus === "disabled") return false;
-        if (statusFilter === "disabled" && c.connectionStatus !== "disabled") return false;
-        if (["paid", "unpaid", "partial", "overdue"].includes(statusFilter) && paymentStatusOf(c) !== statusFilter) return false;
-      }
       if (areaFilter !== "all" && c.areaId !== areaFilter) return false;
-      if (dueFilter === "thisweek") {
-        const dueDate = c.nextDueDate ?? 0;
-        if (dueDate < now || dueDate > weekFromNow) return false;
-      }
       return true;
     });
 
-    result.sort((a, b) => {
-      if (dueFilter === "thisweek") {
-        return (a.nextDueDate ?? 0) - (b.nextDueDate ?? 0);
-      }
-      return (b.createdAt ?? 0) - (a.createdAt ?? 0);
-    });
+    result.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
 
     return result;
-  }, [customers, search, statusFilter, areaFilter, dueFilter]);
+  }, [customers, search, areaFilter]);
 
   const effectivePerPage = itemsPerPage === 0 ? filtered.length : itemsPerPage;
   const pageItems = filtered.slice((page - 1) * effectivePerPage, page * effectivePerPage);
