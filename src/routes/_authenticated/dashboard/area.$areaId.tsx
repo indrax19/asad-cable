@@ -240,6 +240,9 @@ function AreaDashboardPage() {
         <StatCard title="Paid" value={paid} icon={CheckCircle2} tone="success" onClick={() => setFilterType("paid")} />
         <StatCard title="Unpaid" value={unpaid} icon={AlertCircle} tone="warning" onClick={() => setFilterType("unpaid")} />
         <StatCard title="Overdue" value={overdue} icon={Clock} tone="danger" onClick={() => setFilterType("overdue")} />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mt-3 md:mt-4">
         <StatCard
           title="Monthly Revenue"
           value={fmtPKR(monthlyRevenue)}
