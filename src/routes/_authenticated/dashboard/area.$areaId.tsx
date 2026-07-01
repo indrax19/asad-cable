@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { collection, onSnapshot, doc, getDoc, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
 import { StatusBadge } from "@/components/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,7 @@ import {
   TrendingUp,
   Wallet,
   X,
+  ArrowLeft,
 } from "lucide-react";
 import {
   Table,
@@ -56,6 +58,7 @@ export const Route = createFileRoute("/_authenticated/dashboard/area/$areaId")({
 function AreaDashboardPage() {
   const { areaId } = Route.useParams();
   const { role, user } = useAuth();
+  const navigate = useNavigate();
   const [area, setArea] = useState<AreaDoc | null>(null);
   const [dealers, setDealers] = useState<UserDoc[]>([]);
   const [assignedDealer, setAssignedDealer] = useState<UserDoc | null>(null);
@@ -220,17 +223,28 @@ function AreaDashboardPage() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div className="flex-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{area.name}</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Area Code: {area.code}</p>
-        </div>
-        {assignedDealer && (
-          <div className="text-right bg-muted/50 px-4 py-3 rounded-lg whitespace-nowrap">
-            <p className="text-sm text-muted-foreground">Assigned Dealer</p>
-            <p className="text-lg font-semibold">{assignedDealer.name}</p>
+      <div className="mb-6">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate({ to: "/dashboard" })}
+          className="mb-4"
+        >
+          <ArrowLeft className="size-4 mr-2" />
+          Back
+        </Button>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl font-semibold tracking-tight">{area.name}</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Area Code: {area.code}</p>
           </div>
-        )}
+          {assignedDealer && (
+            <div className="text-right bg-muted/50 px-4 py-3 rounded-lg whitespace-nowrap">
+              <p className="text-sm text-muted-foreground">Assigned Dealer</p>
+              <p className="text-lg font-semibold">{assignedDealer.name}</p>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
@@ -240,6 +254,9 @@ function AreaDashboardPage() {
         <StatCard title="Paid" value={paid} icon={CheckCircle2} tone="success" onClick={() => setFilterType("paid")} />
         <StatCard title="Unpaid" value={unpaid} icon={AlertCircle} tone="warning" onClick={() => setFilterType("unpaid")} />
         <StatCard title="Overdue" value={overdue} icon={Clock} tone="danger" onClick={() => setFilterType("overdue")} />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mt-3 md:mt-4">
         <StatCard
           title="Monthly Revenue"
           value={fmtPKR(monthlyRevenue)}

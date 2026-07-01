@@ -140,16 +140,10 @@ import { reversePayment, reassignPayment } from "@/lib/payment-correction";
 
 export const Route = createFileRoute("/_authenticated/users")({
   component: UsersPage,
-  validateSearch: (search: Record<string, unknown>) => ({
-    status: (search.status as string) || "all",
-    due: (search.due as string) || "all",
-  }),
 });
 
 function UsersPage() {
   const { user, role } = useAuth();
-  const searchParams = useSearch({ from: "/_authenticated/users" });
-  const navigate = useNavigate({ from: "/_authenticated/users" });
   const [customers, setCustomers] = useState<UserDoc[]>([]);
   const [areas, setAreas] = useState<AreaDoc[]>([]);
   const [packages, setPackages] = useState<PackageDoc[]>([]);
@@ -163,11 +157,9 @@ function UsersPage() {
   const isMounted = useRef(true);
 
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState(searchParams.status);
   const [areaFilter, setAreaFilter] = useState("all");
-  const [dueFilter, setDueFilter] = useState(searchParams.due);
   const [page, setPage] = useState(1);
-  const PER = 15;
+  const [itemsPerPage, setItemsPerPage] = useState(50);
 
   useEffect(() => {
     isMounted.current = true;
@@ -205,40 +197,24 @@ function UsersPage() {
   }, [role, user]);
 
   const filtered = useMemo(() => {
-    const now = Date.now();
-    const weekFromNow = now + 7 * 24 * 60 * 60 * 1000;
-
     const result = customers.filter((c) => {
       if (
         search &&
         !`${c.name} ${c.phone ?? ""} ${c.cnic ?? ""}`.toLowerCase().includes(search.toLowerCase())
       )
         return false;
-      if (statusFilter !== "all") {
-        if (statusFilter === "active" && c.connectionStatus === "disabled") return false;
-        if (statusFilter === "disabled" && c.connectionStatus !== "disabled") return false;
-        if (["paid", "unpaid", "partial", "overdue"].includes(statusFilter) && paymentStatusOf(c) !== statusFilter) return false;
-      }
       if (areaFilter !== "all" && c.areaId !== areaFilter) return false;
-      if (dueFilter === "thisweek") {
-        const dueDate = c.nextDueDate ?? 0;
-        if (dueDate < now || dueDate > weekFromNow) return false;
-      }
       return true;
     });
 
-    result.sort((a, b) => {
-      if (dueFilter === "thisweek") {
-        return (a.nextDueDate ?? 0) - (b.nextDueDate ?? 0);
-      }
-      return (b.createdAt ?? 0) - (a.createdAt ?? 0);
-    });
+    result.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
 
     return result;
-  }, [customers, search, statusFilter, areaFilter, dueFilter]);
+  }, [customers, search, areaFilter]);
 
-  const pageItems = filtered.slice((page - 1) * PER, page * PER);
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PER));
+  const effectivePerPage = itemsPerPage === 0 ? filtered.length : itemsPerPage;
+  const pageItems = filtered.slice((page - 1) * effectivePerPage, page * effectivePerPage);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / effectivePerPage));
 
   const toggleSelection = (uid: string) => {
     const newSet = new Set(selectedForReminder);
@@ -305,8 +281,8 @@ function UsersPage() {
 
       <Card className="mb-4">
         <CardContent className="p-2 sm:p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3">
-            <div className="relative sm:col-span-1 lg:col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+            <div className="relative sm:col-span-1">
               <Search className="size-3 sm:size-4 absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 className="pl-7 sm:pl-9 h-9 sm:h-10 text-xs sm:text-sm"
@@ -318,35 +294,6 @@ function UsersPage() {
                 }}
               />
             </div>
-            <select
-              className="h-9 sm:h-10 rounded-md border bg-background px-2 sm:px-3 text-xs sm:text-sm"
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setPage(1);
-                navigate({ search: (prev) => ({ ...prev, status: e.target.value }) });
-              }}
-            >
-              <option value="all">All statuses</option>
-              <option value="active">Active</option>
-              <option value="disabled">Disabled</option>
-              <option value="paid">Paid</option>
-              <option value="unpaid">Unpaid</option>
-              <option value="partial">Partial</option>
-              <option value="overdue">Overdue</option>
-            </select>
-            <select
-              className="h-9 sm:h-10 rounded-md border bg-background px-2 sm:px-3 text-xs sm:text-sm"
-              value={dueFilter}
-              onChange={(e) => {
-                setDueFilter(e.target.value);
-                setPage(1);
-                navigate({ search: (prev) => ({ ...prev, due: e.target.value }) });
-              }}
-            >
-              <option value="all">All dates</option>
-              <option value="thisweek">Due this week</option>
-            </select>
             <select
               className="h-9 sm:h-10 rounded-md border bg-background px-2 sm:px-3 text-xs sm:text-sm"
               value={areaFilter}
@@ -716,8 +663,24 @@ function UsersPage() {
         </CardContent>
       </Card>
 
-      <div className="flex items-center justify-between mt-3 gap-2 text-xs sm:text-sm px-1">
-        <div className="text-muted-foreground">{filtered.length} customers</div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-3 gap-3 text-xs sm:text-sm px-1">
+        <div className="flex items-center gap-3">
+          <div className="text-muted-foreground">{filtered.length} customers</div>
+          <select
+            className="h-8 rounded-md border bg-background px-2 text-xs"
+            value={itemsPerPage}
+            onChange={(e) => {
+              const val = e.target.value === "all" ? 0 : Number(e.target.value);
+              setItemsPerPage(val);
+              setPage(1);
+            }}
+          >
+            <option value={50}>50 per page</option>
+            <option value={100}>100 per page</option>
+            <option value={1000}>1000 per page</option>
+            <option value="all">All</option>
+          </select>
+        </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <Button
             size="sm"

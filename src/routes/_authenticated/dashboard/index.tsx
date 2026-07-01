@@ -227,6 +227,9 @@ function DashboardPage() {
         <div onClick={() => handleStatClick("overdue")} className="cursor-pointer hover:opacity-90 transition-opacity">
           <StatCard title="Overdue" value={overdue} icon={Clock} tone="danger" />
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mt-3 md:mt-4">
         <div>
           <StatCard
             title="Monthly Revenue"
