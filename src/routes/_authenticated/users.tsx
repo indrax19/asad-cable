@@ -159,7 +159,16 @@ function UsersPage() {
 
   const [search, setSearch] = useState("");
   const [areaFilter, setAreaFilter] = useState("all");
-  const [paymentStatus, setPaymentStatus] = useState<string>((searchParams as any)?.status === "paid" ? "paid" : (searchParams as any)?.status === "unpaid" ? "unpaid" : "all");
+  const statusParam = (searchParams as any)?.status;
+  const [paymentStatus, setPaymentStatus] = useState<string>(
+    statusParam === "paid" ? "paid" : statusParam === "unpaid" ? "unpaid" : "all"
+  );
+  const [statusFilter, setStatusFilter] = useState<string>(
+    statusParam === "active" ? "active" : statusParam === "disabled" ? "disabled" : "all"
+  );
+  const [dueFilter, setDueFilter] = useState<string>(
+    statusParam === "overdue" ? "overdue" : "all"
+  );
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
@@ -208,13 +217,19 @@ function UsersPage() {
       if (areaFilter !== "all" && c.areaId !== areaFilter) return false;
       if (paymentStatus === "paid" && (c.pendingAmount ?? 0) > 0) return false;
       if (paymentStatus === "unpaid" && (c.pendingAmount ?? 0) === 0) return false;
+      if (statusFilter === "active" && c.connectionStatus !== "active") return false;
+      if (statusFilter === "disabled" && c.connectionStatus !== "disconnected") return false;
+      if (dueFilter === "overdue") {
+        const status = paymentStatusOf(c);
+        if (status !== "overdue") return false;
+      }
       return true;
     });
 
     result.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
 
     return result;
-  }, [customers, search, areaFilter, paymentStatus]);
+  }, [customers, search, areaFilter, paymentStatus, statusFilter, dueFilter]);
 
   const effectivePerPage = itemsPerPage === 0 ? filtered.length : itemsPerPage;
   const pageItems = filtered.slice((page - 1) * effectivePerPage, page * effectivePerPage);
