@@ -37,6 +37,36 @@ export const Route = createFileRoute("/_authenticated/payments")({
   component: PaymentsPage,
 });
 
+function generateMonthOptions() {
+  const options = [];
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  for (let i = 0; i < 12; i++) {
+    let month = currentMonth - i;
+    let year = currentYear;
+
+    if (month < 0) {
+      month += 12;
+      year -= 1;
+    }
+
+    options.push(
+      <option key={`${year}-${month}`} value={`${year}-${month}`}>
+        {months[month]} {year}
+      </option>
+    );
+  }
+
+  return options;
+}
+
 function PaymentsPage() {
   const { user, role } = useAuth();
   const navigate = useNavigate();
@@ -45,6 +75,7 @@ function PaymentsPage() {
   const [packages, setPackages] = useState<PackageDoc[]>([]);
   const [search, setSearch] = useState("");
   const [method, setMethod] = useState("all");
+  const [selectedMonth, setSelectedMonth] = useState<{ year: number; month: number } | null>(null);
   const [selectedUser, setSelectedUser] = useState<UserDoc | null>(null);
   const [selectedPayment, setSelectedPayment] = useState<PaymentDoc | null>(null);
   const [correctionMode, setCorrectionMode] = useState<"reversal" | "reassignment" | null>(null);
@@ -85,9 +116,15 @@ function PaymentsPage() {
         !`${p.customerName ?? ""} ${p.notes ?? ""}`.toLowerCase().includes(search.toLowerCase())
       )
         return false;
+      if (selectedMonth) {
+        const paymentDate = new Date(p.date);
+        if (paymentDate.getFullYear() !== selectedMonth.year || paymentDate.getMonth() !== selectedMonth.month) {
+          return false;
+        }
+      }
       return true;
     });
-  }, [payments, search, method]);
+  }, [payments, search, method, selectedMonth]);
 
   const total = filtered.reduce((s, p) => s + p.amount, 0);
   const monthStart = new Date();
@@ -115,7 +152,7 @@ function PaymentsPage() {
       </div>
 
       <Card className="mb-4">
-        <CardContent className="p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+        <CardContent className="p-4 grid grid-cols-1 md:grid-cols-4 gap-3">
           <div className="relative md:col-span-2">
             <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -135,6 +172,21 @@ function PaymentsPage() {
             <option value="bank">Bank</option>
             <option value="jazzcash">JazzCash</option>
             <option value="easypaisa">EasyPaisa</option>
+          </select>
+          <select
+            className="h-10 rounded-md border bg-background px-3 text-sm"
+            value={selectedMonth ? `${selectedMonth.year}-${selectedMonth.month}` : ""}
+            onChange={(e) => {
+              if (e.target.value) {
+                const [year, month] = e.target.value.split("-");
+                setSelectedMonth({ year: parseInt(year), month: parseInt(month) });
+              } else {
+                setSelectedMonth(null);
+              }
+            }}
+          >
+            <option value="">All months</option>
+            {generateMonthOptions()}
           </select>
         </CardContent>
       </Card>
