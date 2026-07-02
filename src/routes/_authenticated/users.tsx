@@ -144,6 +144,7 @@ export const Route = createFileRoute("/_authenticated/users")({
 
 function UsersPage() {
   const { user, role } = useAuth();
+  const searchParams = useSearch({ from: "/_authenticated/users" });
   const [customers, setCustomers] = useState<UserDoc[]>([]);
   const [areas, setAreas] = useState<AreaDoc[]>([]);
   const [packages, setPackages] = useState<PackageDoc[]>([]);
@@ -158,7 +159,7 @@ function UsersPage() {
 
   const [search, setSearch] = useState("");
   const [areaFilter, setAreaFilter] = useState("all");
-  const [paymentStatus, setPaymentStatus] = useState("all");
+  const [paymentStatus, setPaymentStatus] = useState<string>((searchParams as any)?.status === "paid" ? "paid" : (searchParams as any)?.status === "unpaid" ? "unpaid" : "all");
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
