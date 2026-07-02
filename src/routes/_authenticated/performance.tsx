@@ -287,21 +287,19 @@ function PerformancePage() {
               <Table>
                 <TableHeader className="bg-slate-100 dark:bg-slate-800">
                   <TableRow className="border-slate-200 dark:border-slate-700 hover:bg-transparent">
-                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-3">Dealer</TableHead>
-                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-3">Areas</TableHead>
-                    <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 py-3">Today's Payment</TableHead>
-                    <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 py-3">Monthly Revenue</TableHead>
-                    <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 py-3">Pending Recovery</TableHead>
+                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300 py-3 px-4 sm:px-6">Dealer</TableHead>
+                    <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 py-3 px-2 sm:px-4">Today's Payment</TableHead>
+                    <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 py-3 px-2 sm:px-4">Monthly Revenue</TableHead>
+                    <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 py-3 px-2 sm:px-4">Pending Recovery</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {dealerPerformance.map((perf, idx) => (
                     <TableRow key={perf.dealer.uid} className={`border-slate-200 dark:border-slate-700 ${idx % 2 === 1 ? 'bg-slate-50 dark:bg-slate-900/30' : ''} hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-colors`}>
-                      <TableCell className="font-semibold text-slate-900 dark:text-white py-4">{perf.dealer.name}</TableCell>
-                      <TableCell className="text-sm text-slate-600 dark:text-slate-400 py-4">{perf.areas.map((a) => a.name).join(", ") || "—"}</TableCell>
-                      <TableCell className="text-right font-bold text-blue-600 dark:text-blue-400 py-4">{fmtPKR(perf.todayRevenue)}</TableCell>
-                      <TableCell className="text-right font-bold text-green-600 dark:text-green-400 py-4">{fmtPKR(perf.monthlyRevenue)}</TableCell>
-                      <TableCell className="text-right font-bold text-red-600 dark:text-red-400 py-4">{fmtPKR(perf.pendingRecovery)}</TableCell>
+                      <TableCell className="font-semibold text-slate-900 dark:text-white py-4 px-4 sm:px-6 text-sm sm:text-base">{perf.dealer.name}</TableCell>
+                      <TableCell className="text-right font-bold text-blue-600 dark:text-blue-400 py-4 px-2 sm:px-4 text-xs sm:text-sm">{fmtPKR(perf.todayRevenue)}</TableCell>
+                      <TableCell className="text-right font-bold text-green-600 dark:text-green-400 py-4 px-2 sm:px-4 text-xs sm:text-sm">{fmtPKR(perf.monthlyRevenue)}</TableCell>
+                      <TableCell className="text-right font-bold text-red-600 dark:text-red-400 py-4 px-2 sm:px-4 text-xs sm:text-sm">{fmtPKR(perf.pendingRecovery)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

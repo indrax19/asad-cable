@@ -144,6 +144,7 @@ export const Route = createFileRoute("/_authenticated/users")({
 
 function UsersPage() {
   const { user, role } = useAuth();
+  const searchParams = useSearch({ from: "/_authenticated/users" });
   const [customers, setCustomers] = useState<UserDoc[]>([]);
   const [areas, setAreas] = useState<AreaDoc[]>([]);
   const [packages, setPackages] = useState<PackageDoc[]>([]);
@@ -158,6 +159,16 @@ function UsersPage() {
 
   const [search, setSearch] = useState("");
   const [areaFilter, setAreaFilter] = useState("all");
+  const statusParam = (searchParams as any)?.status;
+  const [paymentStatus, setPaymentStatus] = useState<string>(
+    statusParam === "paid" ? "paid" : statusParam === "unpaid" ? "unpaid" : "all"
+  );
+  const [statusFilter, setStatusFilter] = useState<string>(
+    statusParam === "active" ? "active" : statusParam === "disabled" ? "disabled" : "all"
+  );
+  const [dueFilter, setDueFilter] = useState<string>(
+    statusParam === "overdue" ? "overdue" : "all"
+  );
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
@@ -204,13 +215,21 @@ function UsersPage() {
       )
         return false;
       if (areaFilter !== "all" && c.areaId !== areaFilter) return false;
+      if (paymentStatus === "paid" && (c.pendingAmount ?? 0) > 0) return false;
+      if (paymentStatus === "unpaid" && (c.pendingAmount ?? 0) === 0) return false;
+      if (statusFilter === "active" && c.connectionStatus !== "active") return false;
+      if (statusFilter === "disabled" && c.connectionStatus !== "disconnected") return false;
+      if (dueFilter === "overdue") {
+        const status = paymentStatusOf(c);
+        if (status !== "overdue") return false;
+      }
       return true;
     });
 
     result.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
 
     return result;
-  }, [customers, search, areaFilter]);
+  }, [customers, search, areaFilter, paymentStatus, statusFilter, dueFilter]);
 
   const effectivePerPage = itemsPerPage === 0 ? filtered.length : itemsPerPage;
   const pageItems = filtered.slice((page - 1) * effectivePerPage, page * effectivePerPage);
@@ -281,7 +300,7 @@ function UsersPage() {
 
       <Card className="mb-4">
         <CardContent className="p-2 sm:p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
             <div className="relative sm:col-span-1">
               <Search className="size-3 sm:size-4 absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -308,6 +327,18 @@ function UsersPage() {
                   {a.name}
                 </option>
               ))}
+            </select>
+            <select
+              className="h-9 sm:h-10 rounded-md border bg-background px-2 sm:px-3 text-xs sm:text-sm"
+              value={paymentStatus}
+              onChange={(e) => {
+                setPaymentStatus(e.target.value);
+                setPage(1);
+              }}
+            >
+              <option value="all">All payment status</option>
+              <option value="paid">Paid</option>
+              <option value="unpaid">Unpaid</option>
             </select>
           </div>
         </CardContent>
