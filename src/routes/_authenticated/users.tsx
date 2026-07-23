@@ -211,7 +211,7 @@ function UsersPage() {
     const result = customers.filter((c) => {
       if (
         search &&
-        !`${c.name} ${c.phone ?? ""} ${c.cnic ?? ""}`.toLowerCase().includes(search.toLowerCase())
+        !`${c.name} ${c.username ?? ""} ${c.phone ?? ""} ${c.cnic ?? ""}`.toLowerCase().includes(search.toLowerCase())
       )
         return false;
       if (areaFilter !== "all" && c.areaId !== areaFilter) return false;
