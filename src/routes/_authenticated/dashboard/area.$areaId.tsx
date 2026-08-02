@@ -173,7 +173,10 @@ function AreaDashboardPage() {
   const paid = paidList.length;
   const partialList = activeCustomers.filter((c) => paymentStatusOf(c) === "partial");
   const partial = partialList.length;
-  const unpaidList = activeCustomers.filter((c) => (c.pendingAmount ?? 0) > 0);
+  const unpaidList = activeCustomers.filter((c) => {
+    const status = paymentStatusOf(c);
+    return status === "unpaid" || status === "overdue";
+  });
   const unpaid = unpaidList.length;
   const overdueList = activeCustomers.filter((c) => paymentStatusOf(c) === "overdue");
   const overdue = overdueList.length;

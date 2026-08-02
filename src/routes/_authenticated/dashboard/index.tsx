@@ -147,7 +147,10 @@ function DashboardPage() {
   const activeCustomers = customers.filter((c) => c.connectionStatus !== "disabled");
   const paid = activeCustomers.filter((c) => ["paid", "partial"].includes(paymentStatusOf(c))).length;
   const partial = activeCustomers.filter((c) => paymentStatusOf(c) === "partial").length;
-  const unpaid = activeCustomers.filter((c) => (c.pendingAmount ?? 0) > 0).length;
+  const unpaid = activeCustomers.filter((c) => {
+    const status = paymentStatusOf(c);
+    return status === "unpaid" || status === "overdue";
+  }).length;
   const overdue = activeCustomers.filter((c) => paymentStatusOf(c) === "overdue").length;
   const pendingRecovery = activeCustomers.reduce((sum, c) => sum + (c.pendingAmount ?? 0), 0);
 
