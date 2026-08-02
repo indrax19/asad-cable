@@ -215,7 +215,12 @@ function UsersPage() {
       )
         return false;
       if (areaFilter !== "all" && c.areaId !== areaFilter) return false;
-      if (paymentStatus !== "all" && paymentStatusOf(c) !== paymentStatus) return false;
+      if (
+        paymentStatus !== "all" &&
+        paymentStatusOf(c) !== paymentStatus &&
+        !(paymentStatus === "unpaid" && paymentStatusOf(c) === "overdue")
+      )
+        return false;
       if (statusFilter === "active" && c.connectionStatus !== "active") return false;
       if (statusFilter === "disabled" && c.connectionStatus !== "disconnected") return false;
       if (dueFilter === "overdue") {
