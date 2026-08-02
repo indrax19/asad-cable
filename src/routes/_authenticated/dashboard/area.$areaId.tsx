@@ -23,6 +23,7 @@ import {
   Clock,
   TrendingUp,
   Wallet,
+  CircleDollarSign,
   X,
   ArrowLeft,
 } from "lucide-react";
@@ -168,9 +169,14 @@ function AreaDashboardPage() {
   const disabledList = customers.filter((c) => c.connectionStatus === "disabled");
   const disabled = disabledList.length;
   const activeCustomers = activeList;
-  const paidList = activeCustomers.filter((c) => (c.pendingAmount ?? 0) <= 0);
+  const paidList = activeCustomers.filter((c) => ["paid", "partial"].includes(paymentStatusOf(c)));
   const paid = paidList.length;
-  const unpaidList = activeCustomers.filter((c) => (c.pendingAmount ?? 0) > 0);
+  const partialList = activeCustomers.filter((c) => paymentStatusOf(c) === "partial");
+  const partial = partialList.length;
+  const unpaidList = activeCustomers.filter((c) => {
+    const status = paymentStatusOf(c);
+    return status === "unpaid" || status === "overdue";
+  });
   const unpaid = unpaidList.length;
   const overdueList = activeCustomers.filter((c) => paymentStatusOf(c) === "overdue");
   const overdue = overdueList.length;
@@ -186,6 +192,8 @@ function AreaDashboardPage() {
         return disabledList;
       case "paid":
         return paidList;
+      case "partial":
+        return partialList;
       case "unpaid":
         return unpaidList;
       case "overdue":
@@ -216,7 +224,8 @@ function AreaDashboardPage() {
   });
 
   const statusData = [
-    { name: "Paid", value: paid, color: "var(--color-success)" },
+    { name: "Paid", value: paid - partial, color: "var(--color-success)" },
+    { name: "Partial Paid", value: partial, color: "var(--color-warning)" },
     { name: "Unpaid", value: unpaid - overdue, color: "var(--color-warning)" },
     { name: "Overdue", value: overdue, color: "var(--color-destructive)" },
   ].filter((d) => d.value > 0);
@@ -252,6 +261,7 @@ function AreaDashboardPage() {
         <StatCard title="Active" value={active} icon={UserCheck} tone="success" onClick={() => setFilterType("active")} />
         <StatCard title="Disabled" value={disabled} icon={UserX} onClick={() => setFilterType("disabled")} />
         <StatCard title="Paid" value={paid} icon={CheckCircle2} tone="success" onClick={() => setFilterType("paid")} />
+        <StatCard title="Partial Paid" value={partial} icon={CircleDollarSign} tone="warning" onClick={() => setFilterType("partial")} />
         <StatCard title="Unpaid" value={unpaid} icon={AlertCircle} tone="warning" onClick={() => setFilterType("unpaid")} />
         <StatCard title="Overdue" value={overdue} icon={Clock} tone="danger" onClick={() => setFilterType("overdue")} />
       </div>
@@ -438,6 +448,7 @@ function AreaDashboardPage() {
               {filterType === "active" && "Active Users"}
               {filterType === "disabled" && "Disabled Users"}
               {filterType === "paid" && "Paid Users"}
+              {filterType === "partial" && "Partial Paid Users"}
               {filterType === "unpaid" && "Unpaid Users"}
               {filterType === "overdue" && "Overdue Users"}
             </DialogTitle>

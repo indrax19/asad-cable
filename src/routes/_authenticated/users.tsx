@@ -161,7 +161,7 @@ function UsersPage() {
   const [areaFilter, setAreaFilter] = useState("all");
   const statusParam = (searchParams as any)?.status;
   const [paymentStatus, setPaymentStatus] = useState<string>(
-    statusParam === "paid" ? "paid" : statusParam === "unpaid" ? "unpaid" : "all"
+    statusParam === "paid" || statusParam === "partial" || statusParam === "unpaid" ? statusParam : "all"
   );
   const [statusFilter, setStatusFilter] = useState<string>(
     statusParam === "active" ? "active" : statusParam === "disabled" ? "disabled" : "all"
@@ -215,8 +215,15 @@ function UsersPage() {
       )
         return false;
       if (areaFilter !== "all" && c.areaId !== areaFilter) return false;
-      if (paymentStatus === "paid" && (c.pendingAmount ?? 0) > 0) return false;
-      if (paymentStatus === "unpaid" && (c.pendingAmount ?? 0) === 0) return false;
+      if (
+        paymentStatus !== "all" &&
+        paymentStatusOf(c) !== paymentStatus &&
+        !(
+          (paymentStatus === "paid" && paymentStatusOf(c) === "partial") ||
+          (paymentStatus === "unpaid" && paymentStatusOf(c) === "overdue")
+        )
+      )
+        return false;
       if (statusFilter === "active" && c.connectionStatus !== "active") return false;
       if (statusFilter === "disabled" && c.connectionStatus !== "disconnected") return false;
       if (dueFilter === "overdue") {
@@ -338,6 +345,7 @@ function UsersPage() {
             >
               <option value="all">All payment status</option>
               <option value="paid">Paid</option>
+              <option value="partial">Partial Paid</option>
               <option value="unpaid">Unpaid</option>
             </select>
           </div>
