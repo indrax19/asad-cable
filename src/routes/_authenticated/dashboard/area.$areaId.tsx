@@ -169,7 +169,7 @@ function AreaDashboardPage() {
   const disabledList = customers.filter((c) => c.connectionStatus === "disabled");
   const disabled = disabledList.length;
   const activeCustomers = activeList;
-  const paidList = activeCustomers.filter((c) => paymentStatusOf(c) === "paid");
+  const paidList = activeCustomers.filter((c) => ["paid", "partial"].includes(paymentStatusOf(c)));
   const paid = paidList.length;
   const partialList = activeCustomers.filter((c) => paymentStatusOf(c) === "partial");
   const partial = partialList.length;
@@ -221,7 +221,7 @@ function AreaDashboardPage() {
   });
 
   const statusData = [
-    { name: "Paid", value: paid, color: "var(--color-success)" },
+    { name: "Paid", value: paid - partial, color: "var(--color-success)" },
     { name: "Partial Paid", value: partial, color: "var(--color-warning)" },
     { name: "Unpaid", value: unpaid - overdue, color: "var(--color-warning)" },
     { name: "Overdue", value: overdue, color: "var(--color-destructive)" },

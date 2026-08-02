@@ -218,7 +218,10 @@ function UsersPage() {
       if (
         paymentStatus !== "all" &&
         paymentStatusOf(c) !== paymentStatus &&
-        !(paymentStatus === "unpaid" && paymentStatusOf(c) === "overdue")
+        !(
+          (paymentStatus === "paid" && paymentStatusOf(c) === "partial") ||
+          (paymentStatus === "unpaid" && paymentStatusOf(c) === "overdue")
+        )
       )
         return false;
       if (statusFilter === "active" && c.connectionStatus !== "active") return false;

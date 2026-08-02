@@ -145,7 +145,7 @@ function DashboardPage() {
   const active = customers.filter((c) => c.connectionStatus !== "disabled").length;
   const disabled = customers.filter((c) => c.connectionStatus === "disabled").length;
   const activeCustomers = customers.filter((c) => c.connectionStatus !== "disabled");
-  const paid = activeCustomers.filter((c) => paymentStatusOf(c) === "paid").length;
+  const paid = activeCustomers.filter((c) => ["paid", "partial"].includes(paymentStatusOf(c))).length;
   const partial = activeCustomers.filter((c) => paymentStatusOf(c) === "partial").length;
   const unpaid = activeCustomers.filter((c) => (c.pendingAmount ?? 0) > 0).length;
   const overdue = activeCustomers.filter((c) => paymentStatusOf(c) === "overdue").length;
@@ -193,7 +193,7 @@ function DashboardPage() {
   });
 
   const statusData = [
-    { name: "Paid", value: paid, color: "var(--color-success)" },
+    { name: "Paid", value: paid - partial, color: "var(--color-success)" },
     { name: "Partial Paid", value: partial, color: "var(--color-warning)" },
     { name: "Unpaid", value: unpaid - overdue, color: "var(--color-warning)" },
     { name: "Overdue", value: overdue, color: "var(--color-destructive)" },
