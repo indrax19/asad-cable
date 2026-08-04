@@ -52,7 +52,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Pencil, Power, Download, Eye, Trash2, Key, MoreVertical } from "lucide-react";
+import { Plus, Pencil, Power, Download, Eye, EyeOff, Trash2, Key, MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -84,7 +84,11 @@ function DealersPage() {
     isMounted.current = true;
     const u1 = onSnapshot(query(collection(db, "users"), where("role", "==", "dealer")), (snap) => {
       if (!isMounted.current) return;
-      setDealers(snap.docs.map((d) => ({ uid: d.id, ...(d.data() as Omit<UserDoc, "uid">) })));
+      const nextDealers = snap.docs.map((d) => ({ uid: d.id, ...(d.data() as Omit<UserDoc, "uid">) }));
+      setDealers(nextDealers);
+      setSelectedDealer((current) =>
+        current ? nextDealers.find((dealer) => dealer.uid === current.uid) ?? current : null,
+      );
     });
     const u2 = onSnapshot(collection(db, "areas"), (snap) => {
       if (!isMounted.current) return;
@@ -336,6 +340,7 @@ function DealerDialog({
 
         if (password) {
           updatePayload.password = password;
+          updatePayload.passwordUpdatedAt = Date.now();
           try {
             const sec = getSecondaryAuth();
             const cred = await signInWithEmailAndPassword(
@@ -374,6 +379,7 @@ function DealerDialog({
           name,
           email,
           password,
+          passwordUpdatedAt: Date.now(),
           phone,
           cnic,
           address,
@@ -496,6 +502,27 @@ function DealerDialog({
         </DialogFooter>
       </form>
     </DialogContent>
+  );
+}
+
+function DealerPasswordInfoRow({ password }: { password?: string }) {
+  const [showPassword, setShowPassword] = useState(false);
+
+  return (
+    <div className="flex items-center justify-between border-b pb-2 text-sm">
+      <span className="text-muted-foreground">Password</span>
+      <div className="flex items-center gap-2">
+        <span className="font-medium">{showPassword ? password : "••••••••"}</span>
+        <button
+          type="button"
+          onClick={() => setShowPassword((visible) => !visible)}
+          className="text-gray-500 hover:text-gray-700"
+          aria-label={showPassword ? "Hide password" : "Show password"}
+        >
+          {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -699,6 +726,9 @@ function DealerRecoveryDrawer({ dealer, onClose }: { dealer: UserDoc; onClose: (
             {fmtPhone(dealer.phone)} • {fmtCNIC(dealer.cnic)}
           </SheetDescription>
         </SheetHeader>
+        <div className="px-4 pt-4">
+          {dealer.password && <DealerPasswordInfoRow password={dealer.password} />}
+        </div>
         <div className="p-4 space-y-6">
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
