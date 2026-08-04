@@ -226,7 +226,7 @@ function DealersPage() {
                           onClick={() => setSelectedDealer(d)}
                         >
                           <Eye className="size-4 mr-1 text-blue-600" />
-                          View Recovery
+                          Recovery
                         </Button>
                         <DropdownMenu>
                         <DropdownMenuTrigger asChild>
