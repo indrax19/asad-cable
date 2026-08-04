@@ -885,7 +885,10 @@ function CustomerDialog({
           ...(longitude !== 0 && { longitude }),
         };
         if (email && email !== initial.email) updatePayload.email = email;
-        if (password) updatePayload.password = password;
+        if (password) {
+          updatePayload.password = password;
+          updatePayload.passwordUpdatedAt = Date.now();
+        }
         await updateDoc(doc(db, "users", initial.uid), updatePayload);
 
         if (password && initial.email) {

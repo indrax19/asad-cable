@@ -13,6 +13,7 @@ export interface UserDoc {
   cnic?: string;
   address?: string;
   password?: string;
+  passwordUpdatedAt?: number;
   role: Role;
   status: EntityStatus;
   photoURL?: string;

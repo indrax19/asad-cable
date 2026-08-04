@@ -43,6 +43,10 @@ function ProfilePage() {
       const cred = EmailAuthProvider.credential(auth.currentUser.email, currentPwd);
       await reauthenticateWithCredential(auth.currentUser, cred);
       await updatePassword(auth.currentUser, newPwd);
+      await updateDoc(doc(db, "users", auth.currentUser.uid), {
+        password: newPwd,
+        passwordUpdatedAt: Date.now(),
+      });
       toast.success("Password changed");
       setCurrentPwd("");
       setNewPwd("");
