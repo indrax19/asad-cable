@@ -73,6 +73,7 @@ function DealersPage() {
   const { role } = useAuth();
   const [dealers, setDealers] = useState<UserDoc[]>([]);
   const [areas, setAreas] = useState<AreaDoc[]>([]);
+  const [recoveryTotals, setRecoveryTotals] = useState<Record<string, number>>({});
   const [editing, setEditing] = useState<UserDoc | null>(null);
   const [open, setOpen] = useState(false);
   const [selectedDealer, setSelectedDealer] = useState<UserDoc | null>(null);
@@ -94,10 +95,20 @@ function DealersPage() {
       if (!isMounted.current) return;
       setAreas(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<AreaDoc, "id">) })));
     });
+    const u3 = onSnapshot(collection(db, "dealer_recoveries"), (snap) => {
+      if (!isMounted.current) return;
+      const totals: Record<string, number> = {};
+      snap.docs.forEach((entry) => {
+        const recovery = entry.data() as DealerRecoveryDoc;
+        totals[recovery.dealerId] = (totals[recovery.dealerId] ?? 0) + recovery.recoveryAmount;
+      });
+      setRecoveryTotals(totals);
+    });
     return () => {
       isMounted.current = false;
       u1();
       u2();
+      u3();
     };
   }, []);
 
@@ -174,12 +185,13 @@ function DealersPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>CNIC</TableHead>
-                <TableHead>Areas</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-28"></TableHead>
+                <TableHead className="whitespace-normal">Name</TableHead>
+                <TableHead className="whitespace-normal">Phone</TableHead>
+                <TableHead className="whitespace-normal">CNIC</TableHead>
+                <TableHead className="w-[2.5in] min-w-[2.5in] whitespace-normal">Areas</TableHead>
+                <TableHead className="whitespace-normal">Status</TableHead>
+                <TableHead className="whitespace-normal">Recovery</TableHead>
+                <TableHead className="w-52 whitespace-normal">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -190,33 +202,39 @@ function DealersPage() {
                   .join(", ");
                 return (
                   <TableRow key={d.uid}>
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium whitespace-normal break-words">
                       {d.name}
-                      <div className="text-xs text-muted-foreground">{d.email}</div>
+                      <div className="text-xs text-muted-foreground whitespace-normal break-words">{d.email}</div>
                     </TableCell>
-                    <TableCell>{fmtPhone(d.phone)}</TableCell>
-                    <TableCell>{fmtCNIC(d.cnic)}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
+                    <TableCell className="whitespace-normal break-words">{fmtPhone(d.phone)}</TableCell>
+                    <TableCell className="whitespace-normal break-words">{fmtCNIC(d.cnic)}</TableCell>
+                    <TableCell className="w-[2.5in] min-w-[2.5in] whitespace-normal break-words text-sm text-muted-foreground">
                       {areaNames || "—"}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="whitespace-normal">
                       <StatusBadge status={d.status} />
                     </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
+                    <TableCell className="whitespace-normal font-medium">
+                      Rs {fmtPKR(recoveryTotals[d.uid] ?? 0)}
+                    </TableCell>
+                    <TableCell className="whitespace-normal">
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs h-8"
+                          onClick={() => setSelectedDealer(d)}
+                        >
+                          <Eye className="size-4 mr-1 text-blue-600" />
+                          View Recovery
+                        </Button>
+                        <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button size="sm" variant="outline" className="text-xs h-8">
                             Actions
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem
-                            onClick={() => setSelectedDealer(d)}
-                            className="cursor-pointer"
-                          >
-                            <Eye className="size-4 mr-2 text-blue-600" />
-                            <span>View Recovery & Payments</span>
-                          </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => {
                               setEditing(d);
@@ -252,6 +270,7 @@ function DealersPage() {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
@@ -259,7 +278,7 @@ function DealersPage() {
               {filteredDealers.length === 0 && (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={7}
                     className="text-center text-sm text-muted-foreground py-10"
                   >
                     {searchQuery ? "No dealers match your search." : "No dealers yet."}
