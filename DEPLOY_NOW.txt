@@ -1,0 +1,121 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║           🚀 QUICK FIX: DEPLOY EDGE FUNCTION RIGHT NOW 🚀                 ║
+║                                                                            ║
+║           Mسئلہ: admin-users function deploy نہیں ہے                    ║
+║           (Problem: admin-users function not deployed)                    ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+⚡ FASTEST WAY TO FIX (3 COMMANDS)
+════════════════════════════════════════════════════════════════════════════
+
+STEP 1: Install Supabase CLI (if not already installed)
+────────────────────────────────────────────────────────────────────────────
+
+  npm install -g @supabase/cli
+
+  OR if using Homebrew:
+  
+  brew install supabase/tap/supabase
+
+
+STEP 2: Login to Supabase
+────────────────────────────────────────────────────────────────────────────
+
+  supabase login
+
+  This will open browser for authentication
+  Click authorize when prompted
+
+
+STEP 3: Deploy the Function
+────────────────────────────────────────────────────────────────────────────
+
+  supabase functions deploy admin-users
+
+  Wait for:
+  ✓ Function admin-users deployed successfully
+
+
+DONE! ✅
+────────────────────────────────────────────────────────────────────────────
+
+  Total time: ~1-2 minutes
+  
+  After this, customer creation will work immediately!
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                    VERIFY IT WORKED
+═══════════════════════════════════════════════════════════════════════════════
+
+
+In your app:
+
+1. Go to: http://localhost:5173
+2. Login as admin
+3. Go to: /users (Users page)
+4. Click: "Add New Customer"
+5. Fill form and submit
+6. Should work now! ✅
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                    WHAT THESE COMMANDS DO
+═══════════════════════════════════════════════════════════════════════════════
+
+
+npm install -g @supabase/cli
+└── Installs Supabase command-line tool globally
+
+supabase login
+└── Authenticates with your Supabase account
+
+supabase functions deploy admin-users
+└── Deploys the admin-users function to Supabase cloud
+    Now it's accessible and working!
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                    IF IT DOESN'T WORK
+═══════════════════════════════════════════════════════════════════════════════
+
+
+Error: "Function not found"
+→ Try: supabase functions deploy admin-users --project-ref xvjsobbhtwcyelzzibym
+
+Error: "Permission denied"
+→ Try: supabase logout
+       supabase login
+
+Error: "Not authenticated"
+→ Check you ran: supabase login
+
+Need more help?
+→ See: DEPLOY_EDGE_FUNCTION.md (full guide)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                    THAT'S IT!
+═══════════════════════════════════════════════════════════════════════════════
+
+
+Just run those 3 commands and you're done! 🎉
+
+After deployment:
+✅ Customer creation works
+✅ Dealer creation works
+✅ User updates work
+✅ User deletion works
+✅ Everything is operational
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+            Go ahead and run those 3 commands now! 
+            
+            (Bilkul ab hi ye 3 commands run karo!)
+
+═══════════════════════════════════════════════════════════════════════════════
